@@ -1,4 +1,5 @@
 const std = @import("std");
+const fs = std.fs;
 
 const Process = struct {
     allocator: std.mem.Allocator,
@@ -48,7 +49,7 @@ const ProcReader = struct {
         };
     }
 
-    fn readCmdLine(self: ProcReader, proc_dir: std.fs.Dir, pid: u32, buffer: []u8) !usize {
+    fn readCmdLine(self: ProcReader, proc_dir: fs.Dir, pid: u32, buffer: []u8) !usize {
         const path = try std.fmt.allocPrint(self.allocator, "{d}/cmdline", .{pid});
         defer self.allocator.free(path);
 
@@ -57,7 +58,7 @@ const ProcReader = struct {
         return try cmdline.readAll(buffer);
     }
 
-    fn readComm(self: ProcReader, proc_dir: std.fs.Dir, pid: u32, buffer: []u8) !usize {
+    fn readComm(self: ProcReader, proc_dir: fs.Dir, pid: u32, buffer: []u8) !usize {
         const path = try std.fmt.allocPrint(self.allocator, "{d}/comm", .{pid});
         defer self.allocator.free(path);
 
@@ -66,7 +67,7 @@ const ProcReader = struct {
         return try cmdline.readAll(buffer);
     }
 
-    fn readCommand(self: ProcReader, proc_dir: std.fs.Dir, pid: u32) ![]u8 {
+    fn readCommand(self: ProcReader, proc_dir: fs.Dir, pid: u32) ![]u8 {
         var buffer: [256]u8 = undefined;
         var read = try self.readCmdLine(proc_dir, pid, &buffer);
         if (read == 0) {
@@ -80,7 +81,7 @@ const ProcReader = struct {
     }
 
     pub fn readProcesses(self: ProcReader) !ProcessList {
-        var proc_dir = try std.fs.openDirAbsolute(self.proc_path, std.fs.Dir.OpenDirOptions{ .iterate = true });
+        var proc_dir = try fs.openDirAbsolute(self.proc_path, std.fs.Dir.OpenDirOptions{ .iterate = true });
         defer proc_dir.close();
 
         var iter = proc_dir.iterate();
@@ -88,7 +89,7 @@ const ProcReader = struct {
         errdefer process_list.deinit();
 
         while (try iter.next()) |entry| {
-            if (entry.kind != std.fs.File.Kind.directory) {
+            if (entry.kind != fs.File.Kind.directory) {
                 continue;
             }
             const pid: u32 = std.fmt.parseInt(u32, entry.name, 10) catch continue;
