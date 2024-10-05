@@ -29,6 +29,10 @@ const Process = struct {
                 .state = state,
             };
         }
+
+        pub fn deinit(self: Status) void {
+            self.allocator.free(self.state);
+        }
     };
 
     pub fn init(allocator: std.mem.Allocator, pid: u32, command: []const u8, status: Status) !Process {
@@ -42,8 +46,7 @@ const Process = struct {
 
     pub fn deinit(self: Process) void {
         self.allocator.free(self.command);
-        // TODO: move this to Process.Status
-        self.allocator.free(self.status.state);
+        self.status.deinit();
     }
 };
 
