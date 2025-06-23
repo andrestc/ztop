@@ -96,24 +96,24 @@ const App = struct {
         const header = win.child(.{
             .x_off = 5,
             .y_off = 0,
-            .width = .{ .limit = columns.len },
-            .height = .{ .limit = 1 },
+            .width = columns.len,
+            .height = 1,
         });
 
         const body = win.child(.{
             .x_off = 5,
             .y_off = 1,
-            .width = .{ .limit = 120 },
-            .height = .{ .limit = 40 },
+            .width = 120,
+            .height = 40,
         });
 
         // TODO: support scrolling thru the list of processes.
         // Maybe an event + storing offset?
 
-        _ = try header.printSegment(.{ .text = columns, .style = .{} }, .{});
+        _ = header.printSegment(.{ .text = columns, .style = .{} }, .{});
         for (0.., process_list.list.items) |row, p| {
             const text = try std.fmt.allocPrint(self.arena.allocator(), "{d}    {s}    {s}", .{ p.pid, p.status.state, p.command });
-            _ = try body.printSegment(.{ .text = text }, .{ .row_offset = row });
+            _ = body.printSegment(.{ .text = text }, .{ .row_offset = @intCast(row) });
         }
     }
 };

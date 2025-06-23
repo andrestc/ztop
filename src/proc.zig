@@ -17,7 +17,7 @@ const Process = struct {
             var buf: [1024]u8 = undefined;
             var state: []u8 = undefined;
             while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
-                var it = std.mem.split(u8, line, ":\t");
+                var it = std.mem.splitSequence(u8, line, ":\t");
 
                 if (std.mem.eql(u8, it.first(), "State")) {
                     state = try std.mem.Allocator.dupe(allocator, u8, it.next().?);
